@@ -1,6 +1,129 @@
+<!DOCTYPE html>
 <html>
+<head>
+    <title>我的GitHub主页</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+            color: #fff;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0;
+            padding: 20px;
+            overflow: hidden; /* 防止滚动条 */
+        }
+        
+        .container {
+            text-align: center;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 40px;
+            border-radius: 15px;
+            position: relative;
+            z-index: 2; /* 确保文字在粒子之上 */
+        }
+        
+        h1 {
+            font-size: 2.5em;
+            margin-bottom: 15px;
+            color: #00c9ff;
+        }
+        
+        p.subtitle {
+            font-size: 1.5em;
+            margin: 0;
+            opacity: 0.8;
+            color: #92fe9d;
+        }
+
+        /* 粒子画布样式 */
+        #particlesCanvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
+    </style>
+</head>
 <body>
-<h1>Hello World</h1>
-<p>I'm hosted with GitHub Pages.</p>
+    <canvas id="particlesCanvas"></canvas>
+    <div class="container">
+        <h1>欢迎来到我的GitHub主页</h1>
+        <p class="subtitle">探索技术，创造未来</p>
+    </div>
+
+    <script>
+        // 粒子系统（轻量、兼容性好）
+        const canvas = document.getElementById('particlesCanvas');
+        const ctx = canvas.getContext('2d');
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        // 粒子配置
+        const particles = [];
+        const particleCount = 60;
+
+        for (let i = 0; i < particleCount; i++) {
+            particles.push({
+                x: Math.random() * canvas.width,
+                y: Math.random() * canvas.height,
+                vx: (Math.random() - 0.5) * 0.5,
+                vy: (Math.random() - 0.5) * 0.5,
+                radius: Math.random() * 1.2 + 0.5,
+                alpha: Math.random() * 0.5 + 0.2
+            });
+        }
+
+        function draw() {
+            // 半透明覆盖实现淡出轨迹
+            ctx.fillStyle = 'rgba(15, 32, 39, 0.1)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            for (let p of particles) {
+                // 更新位置
+                p.x += p.vx;
+                p.y += p.vy;
+
+                // 边界反弹
+                if (p.x < 0 || p.x > canvas.width) p.vx *= -1;
+                if (p.y < 0 || p.y > canvas.height) p.vy *= -1;
+
+                // 绘制粒子
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+                ctx.fillStyle = `rgba(0, 201, 255, ${p.alpha})`;
+                ctx.fill();
+
+                // 连线效果（仅近距离）
+                for (let other of particles) {
+                    const dx = p.x - other.x;
+                    const dy = p.y - other.y;
+                    const dist = Math.sqrt(dx * dx + dy * dy);
+                    if (dist < 100) {
+                        ctx.beginPath();
+                        ctx.strokeStyle = `rgba(0, 201, 255, ${0.1 * (1 - dist / 100)})`;
+                        ctx.lineWidth = 0.5;
+                        ctx.moveTo(p.x, p.y);
+                        ctx.lineTo(other.x, other.y);
+                        ctx.stroke();
+                    }
+                }
+            }
+
+            requestAnimationFrame(draw);
+        }
+
+        draw();
+    </script>
 </body>
 </html>
